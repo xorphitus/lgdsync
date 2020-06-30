@@ -4,7 +4,7 @@
   (:import
    (com.google.api.client.auth.oauth2 Credential)
    (com.google.api.client.extensions.java6.auth.oauth2 AuthorizationCodeInstalledApp)
-   (com.google.api.client.extensions.jetty.auth.oauth2 LocalServerReceiver)
+   (com.google.api.client.extensions.jetty.auth.oauth2 LocalServerReceiver$Builder)
    (com.google.api.client.googleapis.auth.oauth2 GoogleAuthorizationCodeFlow$Builder)
    (com.google.api.client.googleapis.auth.oauth2 GoogleClientSecrets)
    (com.google.api.client.googleapis.javanet GoogleNetHttpTransport)
@@ -12,7 +12,7 @@
    (com.google.api.client.json JsonFactory)
    (com.google.api.client.json.jackson2 JacksonFactory)
    (com.google.api.client.util.store FileDataStoreFactory)
-   (com.google.api.services.drive Drive)
+   (com.google.api.services.drive Drive$Builder)
    (com.google.api.services.drive DriveScopes)
    (com.google.api.services.drive.model File)
    (com.google.api.services.drive.model FileList))
@@ -35,14 +35,33 @@
                 (GoogleAuthorizationCodeFlow$Builder. http-transport json-factory secrets scopes)
                 (.setDataStoreFactory (FileDataStoreFactory. (io/file tokens-directory-path)))
                 (.setAccessType "offline")
-                (.build))])
-    ))
+                (.build))
+          receiver (->
+                    (LocalServerReceiver$Builder.)
+                    (.setPort 8888)
+                    (.build))])
+    (-> (AuthorizationCodeInstalledApp. flow receiver) (.authorize "user"))))
 
 (comment
   (get-credentials (GoogleNetHttpTransport/newTrustedTransport))
   )
 
+(defn- lst
+  ""
+  []
+  (let [http-transport (GoogleNetHttpTransport/newTrustedTransport)]
+    (->
+     (Drive$Builder. http-transport json-factory (get-credentials http-transport))
+     (.setApplicationName application-name)
+     (.build)
+     (.files)
+     (.list)
+     (.setPageSize 10)
+     (.setFields "nextPageToken, files(id, name)")
+     (.execute)
+     (.getFiles))))
+
 (defn -main
-  "I don't do a whole lot ... yet."
+  "main"
   [& args]
-  (println "Hello, World!"))
+  (println (lst)))
