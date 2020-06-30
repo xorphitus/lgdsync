@@ -5,7 +5,7 @@
    (com.google.api.client.auth.oauth2 Credential)
    (com.google.api.client.extensions.java6.auth.oauth2 AuthorizationCodeInstalledApp)
    (com.google.api.client.extensions.jetty.auth.oauth2 LocalServerReceiver)
-   (com.google.api.client.googleapis.auth.oauth2 GoogleAuthorizationCodeFlow)
+   (com.google.api.client.googleapis.auth.oauth2 GoogleAuthorizationCodeFlow$Builder)
    (com.google.api.client.googleapis.auth.oauth2 GoogleClientSecrets)
    (com.google.api.client.googleapis.javanet GoogleNetHttpTransport)
    (com.google.api.client.http.javanet NetHttpTransport)
@@ -32,8 +32,8 @@
   (with-open [r (io/reader credentials-file-path)]
     (let [secrets (GoogleClientSecrets/load json-factory r)
           flow (->
-                (GoogleAuthorizationCodeFlow/Builder. http-tranport json-factory secrets scopes)
-                (.setDataStoreFactory (FileDataStoreFactory. (java.io/File. tokens-directory-path)))
+                (GoogleAuthorizationCodeFlow$Builder. http-transport json-factory secrets scopes)
+                (.setDataStoreFactory (FileDataStoreFactory. (io/file tokens-directory-path)))
                 (.setAccessType "offline")
                 (.build))])
     ))
