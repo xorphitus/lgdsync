@@ -20,11 +20,12 @@
 
 (def ^:private application-name "Google Drive API Java Quickstart")
 (def ^:private json-factory (.. JacksonFactory getDefaultInstance))
-(def ^:private tokens-directory-path "tokens")
 ;; Global instance of the scopes required by this quickstart.
 ;; If modifying these scopes, delete your previously saved tokens/ folder.
 (def ^:private scopes [DriveScopes/DRIVE_METADATA_READONLY])
-(def ^:private credentials-file-path "/credentials.json")
+(def ^:private config-root (str (System/getenv "HOME") "/.config/lgdsync/"))
+(def ^:private tokens-directory-path (str config-root "tokens"))
+(def ^:private credentials-file-path (str config-root "credentials.json"))
 
 (defn- get-credentials
   "Creates an authorized Credential object"
@@ -57,13 +58,22 @@
      (.execute)
      (.getFiles)
      )))
-l
+
+(defn- create-config-root
+  []
+  (let [dir (io/file config-root)]
+    (when-not (.exists dir)
+      (.mkdir dir))))
+
 (comment
   (get-credentials (GoogleNetHttpTransport/newTrustedTransport))
+  (create-config-root)
   (lst)
   )
 
 (defn -main
   "main"
   [& args]
-  (println (lst)))
+  (do
+    (create-config-root)
+    (lst)))
