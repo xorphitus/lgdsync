@@ -52,20 +52,21 @@
      (.setApplicationName application-name)
      (.build))))
 
-(defn- lst
+(defn- find-sync-dir
   "Get Google Drive File objects.
   See: https://developers.google.com/resources/api-libraries/documentation/drive/v3/java/latest/com/google/api/services/drive/model/File.html"
-  [drive-service]
-  (->
-     drive-service
-     (.files)
-     (.list)
-     (.setPageSize (int 20))
-     (.setFields "nextPageToken, files(id, name, parents)")
-     (.setQ "")
-     (.execute)
-     (.getFiles)
-     ))
+  [drive-service name]
+  (when-let [dir (->
+                  drive-service
+                  (.files)
+                  (.list)
+                  (.setPageSize (int 2))
+                  (.setFields "files(id)")
+                  (.setQ (str "name = '" name "'"))
+                  (.execute)
+                  (.getFiles)
+                  (first))]
+    (.getId dir)))
 
 (defn- create-config-root
   []
@@ -88,14 +89,19 @@
                   (.execute))]
         (.getId file)))))
 
+(defn get-sync-dir
+  ""
+  [drive-service name]
+  (if-let [id (find-sync-dir drive-service name)]
+    id
+    (create-sync-dir (get-drive-service) "lgdsync-test")))
+
 (comment
   (get-credentials (GoogleNetHttpTransport/newTrustedTransport))
   (create-config-root)
-  (lst (get-drive-service))
+  (find-sync-dir (get-drive-service) "lgdsync-test")
   (create-sync-dir (get-drive-service) "lgdsync-test")
-  (type
-   (first
-    (lst)))
+  (get-sync-dir (get-drive-service) "lgdsync-test")
   )
 
 (defn -main
