@@ -39,12 +39,8 @@
           receiver (->
                     (LocalServerReceiver$Builder.)
                     (.setPort 8888)
-                    (.build))])
-    (-> (AuthorizationCodeInstalledApp. flow receiver) (.authorize "user"))))
-
-(comment
-  (get-credentials (GoogleNetHttpTransport/newTrustedTransport))
-  )
+                    (.build))]
+      (-> (AuthorizationCodeInstalledApp. flow receiver) (.authorize "user")))))
 
 (defn- lst
   ""
@@ -56,10 +52,16 @@
      (.build)
      (.files)
      (.list)
-     (.setPageSize 10)
+     (.setPageSize (int 10))
      (.setFields "nextPageToken, files(id, name)")
      (.execute)
-     (.getFiles))))
+     (.getFiles)
+     )))
+l
+(comment
+  (get-credentials (GoogleNetHttpTransport/newTrustedTransport))
+  (lst)
+  )
 
 (defn -main
   "main"
