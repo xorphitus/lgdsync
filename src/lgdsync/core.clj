@@ -22,7 +22,7 @@
 (def ^:private json-factory (.. JacksonFactory getDefaultInstance))
 ;; Global instance of the scopes required by this quickstart.
 ;; If modifying these scopes, delete your previously saved tokens/ folder.
-(def ^:private scopes [DriveScopes/DRIVE_METADATA_READONLY])
+(def ^:private scopes [DriveScopes/DRIVE_FILE])
 (def ^:private config-root (str (System/getenv "HOME") "/.config/lgdsync/"))
 (def ^:private tokens-directory-path (str config-root "tokens"))
 (def ^:private credentials-file-path (str config-root "credentials.json"))
@@ -43,21 +43,29 @@
                     (.build))]
       (-> (AuthorizationCodeInstalledApp. flow receiver) (.authorize "user")))))
 
-(defn- lst
+(defn- get-drive-service
   ""
   []
   (let [http-transport (GoogleNetHttpTransport/newTrustedTransport)]
     (->
      (Drive$Builder. http-transport json-factory (get-credentials http-transport))
      (.setApplicationName application-name)
-     (.build)
+     (.build))))
+
+(defn- lst
+  "Get Google Drive File objects.
+  See: https://developers.google.com/resources/api-libraries/documentation/drive/v3/java/latest/com/google/api/services/drive/model/File.html"
+  [drive-service]
+  (->
+     drive-service
      (.files)
      (.list)
-     (.setPageSize (int 10))
-     (.setFields "nextPageToken, files(id, name)")
+     (.setPageSize (int 20))
+     (.setFields "nextPageToken, files(id, name, parents)")
+     (.setQ "")
      (.execute)
      (.getFiles)
-     )))
+     ))
 
 (defn- create-config-root
   []
@@ -65,10 +73,29 @@
     (when-not (.exists dir)
       (.mkdir dir))))
 
+(defn- create-sync-dir
+  ""
+  [drive-service name]
+  (let [metadata (File.)]
+    (do
+      (.setName metadata name)
+      (.setMimeType metadata "application/vnd.google-apps.folder")
+      (let [file (->
+                  drive-service
+                  (.files)
+                  (.create metadata)
+                  (.setFields "id")
+                  (.execute))]
+        (.getId file)))))
+
 (comment
   (get-credentials (GoogleNetHttpTransport/newTrustedTransport))
   (create-config-root)
-  (lst)
+  (lst (get-drive-service))
+  (create-sync-dir (get-drive-service) "lgdsync-test")
+  (type
+   (first
+    (lst)))
   )
 
 (defn -main
