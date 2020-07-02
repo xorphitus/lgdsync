@@ -17,5 +17,5 @@
   (do
     (create-config-root)
     (let [service (gd/get-drive-service)]
-      (gd/get-sync-dir service))
+      (gd/get-sync-dir service "lgdsync-test"))
     ))

@@ -48,24 +48,27 @@
      (.setApplicationName application-name)
      (.build))))
 
-(defn- find-sync-dir
+(defn- list-sync-dir
   "Get Google Drive File objects.
   See: https://developers.google.com/resources/api-libraries/documentation/drive/v3/java/latest/com/google/api/services/drive/model/File.html"
-  [drive-service name]
+  [drive-service fields siz name]
   (when-let [dir (->
                   drive-service
                   (.files)
                   (.list)
-                  (.setPageSize (int 2))
-                  (.setFields "files(id)")
+                  (.setPageSize (int siz))
+                  (.setFields (str "files(" (clojure.string/join \, fields) ")"))
                   (.setQ (str "name = '" name "'"))
                   (.execute)
-                  (.getFiles)
-                  (first))]
+                  (.getFiles))]))
+
+(defn- find-sync-dir
+  [drive-service name]
+  (when-let [dir (first
+                  (list-sync-dir drive-service ["id"] 1 name))]
     (.getId dir)))
 
 (defn- create-sync-dir
-  ""
   [drive-service name]
   (let [metadata (File.)]
     (do
@@ -80,7 +83,6 @@
         (.getId file)))))
 
 (defn get-sync-dir
-  ""
   [drive-service name]
   (if-let [id (find-sync-dir drive-service name)]
     id
