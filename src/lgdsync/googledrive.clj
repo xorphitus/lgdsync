@@ -22,6 +22,7 @@
 (def ^:private scopes [DriveScopes/DRIVE_FILE])
 (def ^:private tokens-directory-path (str config-root "tokens"))
 (def ^:private credentials-file-path (str config-root "credentials.json"))
+(def ^:private folder-mime-type "application/vnd.google-apps.folder")
 
 (defn- get-credentials
   "Creates an authorized Credential object"
@@ -51,21 +52,21 @@
 (defn- list-sync-dir
   "Get Google Drive File objects.
   See: https://developers.google.com/resources/api-libraries/documentation/drive/v3/java/latest/com/google/api/services/drive/model/File.html"
-  [drive-service fields siz name]
+  [drive-service fields siz name mime-type]
   (when-let [dir (->
                   drive-service
                   (.files)
                   (.list)
                   (.setPageSize (int siz))
                   (.setFields (str "files(" (clojure.string/join \, fields) ")"))
-                  (.setQ (str "name = '" name "'"))
+                  (.setQ (str "name = '" name "' and mimeType='" mime-type "'"))
                   (.execute)
                   (.getFiles))]))
 
 (defn- find-sync-dir
   [drive-service name]
   (when-let [dir (first
-                  (list-sync-dir drive-service ["id"] 1 name))]
+                  (list-sync-dir drive-service ["id"] 1 name folder-mime-type))]
     (.getId dir)))
 
 (defn- create-sync-dir
@@ -73,7 +74,7 @@
   (let [metadata (File.)]
     (do
       (.setName metadata name)
-      (.setMimeType metadata "application/vnd.google-apps.folder")
+      (.setMimeType metadata folder-mime-type)
       (let [file (->
                   drive-service
                   (.files)

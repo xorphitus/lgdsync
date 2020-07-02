@@ -4,7 +4,7 @@
             [lgdsync.googledrive :as gd]))
 
 (def ^:private profile "default")
-(def config-root (str (System/getenv "HOME") "/.config/lgdsync/" profile))
+(def config-root (str (System/getenv "HOME") "/.config/lgdsync/" profile "/"))
 
 (defn- create-config-root
   []
