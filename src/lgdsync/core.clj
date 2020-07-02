@@ -3,7 +3,8 @@
   (:require [clojure.java.io :as io]
             [lgdsync.googledrive :as gd]))
 
-(def config-root (str (System/getenv "HOME") "/.config/lgdsync/"))
+(def ^:private profile "default")
+(def config-root (str (System/getenv "HOME") "/.config/lgdsync/" profile))
 
 (defn- create-config-root
   []
