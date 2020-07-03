@@ -24,6 +24,7 @@
 (def ^:private tokens-directory-path (str config-root "tokens"))
 (def ^:private credentials-file-path (str config-root "credentials.json"))
 (def ^:private folder-mime-type "application/vnd.google-apps.folder")
+(def ^:private callback-url-port 8888)
 
 (defn- get-credentials
   "Creates an authorized Credential object"
@@ -37,7 +38,7 @@
                 (.build))
           receiver (->
                     (LocalServerReceiver$Builder.)
-                    (.setPort 8888)
+                    (.setPort callback-url-port)
                     (.build))]
       (.authorize (AuthorizationCodeInstalledApp. flow receiver) "user"))))
 
@@ -60,8 +61,6 @@
       (.setQ (str "name='" name "' and mimeType='" mime-type "' and trashed=false"))
       (.execute)
       (.getFiles)))
-
-(join \, ["a" "b"])
 
 (defn- find-sync-dir
   [drive-service name]
