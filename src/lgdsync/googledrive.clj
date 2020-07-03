@@ -38,7 +38,7 @@
                     (LocalServerReceiver$Builder.)
                     (.setPort 8888)
                     (.build))]
-      (-> (AuthorizationCodeInstalledApp. flow receiver) (.authorize "user")))))
+      (.authorize (AuthorizationCodeInstalledApp. flow receiver) "user"))))
 
 (defn get-drive-service
   ""
@@ -72,16 +72,14 @@
 (defn- create-sync-dir
   [drive-service name]
   (let [metadata (File.)]
-    (do
-      (.setName metadata name)
-      (.setMimeType metadata folder-mime-type)
-      (let [file (->
-                  drive-service
-                  (.files)
-                  (.create metadata)
-                  (.setFields "id")
-                  (.execute))]
-        (.getId file)))))
+    (.setName metadata name)
+    (.setMimeType metadata folder-mime-type)
+    (-> drive-service
+        (.files)
+        (.create metadata)
+        (.setFields "id")
+        (.execute)
+        (.getId))))
 
 (defn get-sync-dir
   [drive-service name]
