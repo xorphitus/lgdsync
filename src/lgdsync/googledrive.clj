@@ -15,7 +15,7 @@
    (com.google.api.services.drive.model File)
    (com.google.api.services.drive.model FileList))
   (:require [clojure.java.io :as io]
-            [lgdsync.core :refer [config-root]]))
+            [lgdsync.config :refer [config-root]]))
 
 (def ^:private application-name "Google Drive API Java Quickstart")
 (def ^:private json-factory (.. JacksonFactory getDefaultInstance))
@@ -88,3 +88,11 @@
   (if-let [id (find-sync-dir drive-service name)]
     id
     (create-sync-dir (get-drive-service) "lgdsync-test")))
+
+(defn put-file
+  [f]
+  (print (.getName f)))
+
+(defn put-files
+  [xs]
+  (doseq [x xs] (put-file x)))

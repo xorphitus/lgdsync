@@ -2,19 +2,12 @@
   (:gen-class)
   (:require [clojure.core.async :refer [go go-loop <! >! chan alt! timeout]]
             [clojure.java.io :as io]
+            [lgdsync.config :refer [create-config-root]]
             [lgdsync.googledrive :as gd]))
 
-(def ^:private profile "default")
-(def config-root (str (System/getenv "HOME") "/.config/lgdsync/" profile "/"))
 (def ^:private closer (chan))
 
-(defn- create-config-root
-  []
-  (let [dir (io/file config-root)]
-    (when-not (.exists dir)
-      (.mkdir dir))))
-
-(defn now-unix
+(defn- now-unix
   []
   (System/currentTimeMillis))
 
@@ -25,9 +18,11 @@
       (alt!
         ticker
         (do
+          (println "yes")
           (->> (io/file path)
                (file-seq)
-               (filter #(> (.lastModified %) now)))
+               (filter #(> (.lastModified %) now))
+               (gd/put-files))
           (recur (now-unix)))
         closer
         (println "stop sync")))))
