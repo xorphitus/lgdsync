@@ -15,6 +15,7 @@
    (com.google.api.services.drive.model File)
    (com.google.api.services.drive.model FileList))
   (:require [clojure.java.io :as io]
+            [clojure.string :refer [join]]
             [lgdsync.config :refer [config-root]]))
 
 (def ^:private application-name "Google Drive API Java Quickstart")
@@ -50,18 +51,17 @@
      (.build))))
 
 (defn- list-sync-dir
-  "Get Google Drive File objects.
-  See: https://developers.google.com/resources/api-libraries/documentation/drive/v3/java/latest/com/google/api/services/drive/model/File.html"
   [drive-service fields siz name mime-type]
-  (when-let [dir (->
-                  drive-service
-                  (.files)
-                  (.list)
-                  (.setPageSize (int siz))
-                  (.setFields (str "files(" (clojure.string/join \, fields) ")"))
-                  (.setQ (str "name = '" name "' and mimeType='" mime-type "'"))
-                  (.execute)
-                  (.getFiles))]))
+  (-> drive-service
+      (.files)
+      (.list)
+      (.setPageSize (int siz))
+      (.setFields (str "files(" (join \, fields) ")"))
+      (.setQ (str "name = '" name "' and mimeType='" mime-type "'"))
+      (.execute)
+      (.getFiles)))
+
+(join \, ["a" "b"])
 
 (defn- find-sync-dir
   [drive-service name]
