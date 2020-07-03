@@ -89,10 +89,10 @@
     id
     (create-sync-dir (get-drive-service) "lgdsync-test")))
 
-(defn put-file
-  [f]
+(defn- put-file
+  [drive-service f]
   (print (.getName f)))
 
 (defn put-files
-  [xs]
-  (doseq [x xs] (put-file x)))
+  [drive-service fs]
+  (doseq [f fs] (put-file drive-service f)))

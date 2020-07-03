@@ -5,34 +5,38 @@
             [lgdsync.config :refer [create-config-root]]
             [lgdsync.googledrive :as gd]))
 
-(def ^:private closer (chan))
+(def ^:private interval 2000)
+(def ^:private close (chan))
 
 (defn- now-unix
   []
   (System/currentTimeMillis))
 
+(defn- updated-files
+  [path since]
+  (->> (io/file path)
+       (file-seq)
+       (filter #(> (.lastModified %) since))))
+
 (defn run-file-sync
-  [path]
-  (let [ticker (timeout 1000)]
+  [path service]
+  (let [ticker (timeout interval)]
     (go-loop [now (now-unix)]
       (alt!
         ticker
         (do
-          (println "yes")
-          (->> (io/file path)
-               (file-seq)
-               (filter #(> (.lastModified %) now))
-               (gd/put-files))
+          (gd/put-files
+           service
+           (updated-files path (- now interval)))
           (recur (now-unix)))
-        closer
-        (println "stop sync")))))
+        close
+        (comment "do nothing")))))
 
-(defn stop-file-sync
+(defn- stop-file-sync
   []
-  (go (>! closer true)))
+  (go (>! close true)))
 
 (comment
-  (run-file-sync (System/getenv "HOME"))
   (stop-file-sync)
   )
 
@@ -41,6 +45,8 @@
   [& args]
   (do
     (create-config-root)
-    (let [service (gd/get-drive-service)]
-      (gd/get-sync-dir service "lgdsync-test"))
-    ))
+    (let [from (first args)
+          to (second args)
+          service (gd/get-drive-service)]
+      (gd/get-sync-dir service to)
+      (run-file-sync service from))))
