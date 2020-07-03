@@ -38,6 +38,7 @@
 
 (comment
   (stop-file-sync)
+  (gd/get-sync-dir (gd/get-drive-service) "lgdsync-test")
   )
 
 (defn -main

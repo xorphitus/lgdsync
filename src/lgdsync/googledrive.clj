@@ -57,7 +57,7 @@
       (.list)
       (.setPageSize (int siz))
       (.setFields (str "files(" (join \, fields) ")"))
-      (.setQ (str "name = '" name "' and mimeType='" mime-type "'"))
+      (.setQ (str "name='" name "' and mimeType='" mime-type "' and trashed=false"))
       (.execute)
       (.getFiles)))
 
@@ -85,7 +85,7 @@
   [drive-service name]
   (if-let [id (find-sync-dir drive-service name)]
     id
-    (create-sync-dir (get-drive-service) "lgdsync-test")))
+    (create-sync-dir (get-drive-service) name)))
 
 (defn- put-file
   [drive-service f]
