@@ -16,12 +16,14 @@
   [path since]
   (->> (io/file path)
        (file-seq)
-       (filter #(> (.lastModified %) since))))
+       (filter #(and
+                 (> (.lastModified %) since)
+                 (.isFile %)))))
 
 (defn- run-file-sync
   [path service sync-root]
   (go-loop [now (now-unix)]
-    (when syncing
+    (when @syncing
       (let [fs (updated-files path (- now interval))]
         (thread
           (gd/put-files service fs sync-root)))
@@ -31,14 +33,14 @@
 (defn- start-file-sync
   [from to]
   (do
-    (swap! syncing true)
+    (reset! syncing true)
     (let [service (gd/get-drive-service)]
       (gd/get-sync-dir service to)
       (run-file-sync service from to))))
 
 (defn- stop-file-sync
   []
-  (swap! syncing false))
+  (reset! syncing false))
 
 (defn -main
   "main"

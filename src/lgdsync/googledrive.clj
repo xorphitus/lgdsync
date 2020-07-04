@@ -140,4 +140,7 @@
 
 (defn put-files
   [drive-service fs sync-root]
-  (doseq [f fs] (upsert-file drive-service f sync-root)))
+  (doseq [f fs]
+    (do
+      (println (str "put files: " fs))
+      (upsert-file drive-service f sync-root))))
