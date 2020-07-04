@@ -16,6 +16,7 @@
    (com.google.api.services.drive.model File)
    (com.google.api.services.drive.model FileList))
   (:require [clojure.java.io :as io]
+            [clojure.spec.alpha :as s]
             [clojure.string :refer [join]]
             [lgdsync.config :refer [config-root]]))
 
@@ -44,7 +45,6 @@
       (.authorize (AuthorizationCodeInstalledApp. flow receiver) "user"))))
 
 (defn get-drive-service
-  ""
   []
   (let [http-transport (GoogleNetHttpTransport/newTrustedTransport)]
     (->
@@ -59,11 +59,21 @@
     (coll? v) (str \[ (join \, (map to-query-literal v)) \])
     :else (str v)))
 
+
+(s/fdef to-query
+  :args (s/cat :q map?))
+
 (defn- to-query
   [q]
   (join
    " and "
    (map #(str (key %) \= (to-query-literal (val %))) q)))
+
+(s/fdef search-files
+  :args (s/cat :drive-service #(not (string? %))
+               :fields vector?
+               :siz number?
+               :q map?))
 
 (defn- search-files
   [drive-service fields siz q]
@@ -76,6 +86,10 @@
       (.execute)
       (.getFiles)))
 
+(s/fdef find-sync-dir
+  :args (s/cat :drive-service #(not (string? %))
+               :name string?))
+
 (defn- find-sync-dir
   [drive-service name]
   (when-let [dir (first
@@ -84,6 +98,10 @@
                                  "mimeType" folder-mime-type
                                  "trashed" false}))]
     (.getId dir)))
+
+(s/fdef create-sync-dir
+  :args (s/cat :drive-service #(not (string? %))
+               :name string?))
 
 (defn- create-sync-dir
   [drive-service name]
@@ -97,11 +115,19 @@
         (.execute)
         (.getId))))
 
+(s/fdef get-sync-dir
+  :args (s/cat :drive-service #(not (string? %))
+               :name string?))
+
 (defn get-sync-dir
   [drive-service name]
   (if-let [id (find-sync-dir drive-service name)]
     id
     (create-sync-dir (get-drive-service) name)))
+
+(s/fdef get-update-metadata
+  :args (s/cat :f #(not (string? %))
+               :parent string?))
 
 (defn- get-update-metadata
   [f parent]
@@ -142,5 +168,5 @@
   [drive-service fs sync-root]
   (doseq [f fs]
     (do
-      (println (str "put files: " fs))
+      (println (str "put files: " (.getAbsolutePath f)))
       (upsert-file drive-service f sync-root))))
