@@ -6,6 +6,7 @@
    (com.google.api.client.googleapis.auth.oauth2 GoogleAuthorizationCodeFlow$Builder)
    (com.google.api.client.googleapis.auth.oauth2 GoogleClientSecrets)
    (com.google.api.client.googleapis.javanet GoogleNetHttpTransport)
+   (com.google.api.client.http FileContent)
    (com.google.api.client.http.javanet NetHttpTransport)
    (com.google.api.client.json JsonFactory)
    (com.google.api.client.json.jackson2 JacksonFactory)
@@ -51,21 +52,37 @@
      (.setApplicationName application-name)
      (.build))))
 
-(defn- list-sync-dir
-  [drive-service fields siz name mime-type]
+(defn- to-query-literal
+  [v]
+  (cond
+    (string? v) (str "'" v "'")
+    (coll? v) (str \[ (join \, (map to-query-literal v)) \])
+    :else (str v)))
+
+(defn- to-query
+  [q]
+  (join
+   " and "
+   (map #(str (key %) \= (to-query-literal (val %))) q)))
+
+(defn- search-files
+  [drive-service fields siz q]
   (-> drive-service
       (.files)
       (.list)
       (.setPageSize (int siz))
       (.setFields (str "files(" (join \, fields) ")"))
-      (.setQ (str "name='" name "' and mimeType='" mime-type "' and trashed=false"))
+      (.setQ (to-query q))
       (.execute)
       (.getFiles)))
 
 (defn- find-sync-dir
   [drive-service name]
   (when-let [dir (first
-                  (list-sync-dir drive-service ["id"] 1 name folder-mime-type))]
+                  (search-files drive-service ["id"] 1
+                                {"name" name
+                                 "mimeType" folder-mime-type
+                                 "trashed" false}))]
     (.getId dir)))
 
 (defn- create-sync-dir
@@ -86,10 +103,41 @@
     id
     (create-sync-dir (get-drive-service) name)))
 
-(defn- put-file
-  [drive-service f]
-  (print (.getName f)))
+(defn- get-update-metadata
+  [f parent]
+  (let [file-metadata (File.)]
+    (.setName file-metadata (.getName f))
+    (.setParents file-metadata (list parent))
+    file-metadata))
+
+(defn- create-file
+  [drive-service f parent]
+  (-> drive-service
+      (.files)
+      (.create (get-update-metadata f parent) (FileContent. nil f))
+      (.execute)))
+
+(defn- update-file
+  [drive-service id f parent]
+  (-> drive-service
+      (.files)
+      (.update id (get-update-metadata f parent) (FileContent. nil f))
+      (.execute)))
+
+(defn- get-same-file
+  [drive-service name parent]
+  (when-let [file (first (search-files drive-service ["id"] 1
+                                       {"name" name
+                                        "parents" [parent]
+                                        "trashed" false}))]
+    (.getId file)))
+
+(defn- upsert-file
+  [drive-service f parent]
+  (if-let [id (get-same-file drive-service (.getName f) parent)]
+    (update-file drive-service id f parent)
+    (create-file drive-service f parent)))
 
 (defn put-files
-  [drive-service fs]
-  (doseq [f fs] (put-file drive-service f)))
+  [drive-service fs sync-root]
+  (doseq [f fs] (upsert-file drive-service f sync-root)))
