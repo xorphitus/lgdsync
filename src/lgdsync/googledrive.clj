@@ -69,7 +69,7 @@
    (map #(let [k (key %)
                v (val %)]
            (if (= k "parent")
-             (str (to-literal v) " in parents")
+             (str (to-query-literal v) " in parents")
              (str k \= (to-query-literal v)))) q)))
 
 (s/fdef search-files
