@@ -1,44 +1,29 @@
 # lgdsync
-
-FIXME: description
-
-## Installation
-
-Download from http://example.com/FIXME.
+This is an unidirectional file sync application to Google Drive. It backups your files which are placed in a specified directory immediately when you change them.
 
 ## Usage
+First, download `credentials.json` from Google API console and place it in the `~/.config/lgdsync/default` directory.
 
-FIXME: explanation
+Then, type the following command to start sync your files to Google Drive.
 
-    $ java -jar lgdsync-0.1.0-standalone.jar [args]
+    $ java -jar lgdsync-0.1.0-standalone.jar ${from} ${to}
 
-## Options
+* `${from}`
+  * Specify the path which you want to sync
+* `${to}`
+  * Specify the folder name in Google Drive which you want to use to the backup
+  * You don't have to create this folder before start lgdsync. Lgdsync creates the folder automatically
 
-FIXME: listing of options this app accepts.
+## Todo
 
-## Examples
-
-...
-
-### Bugs
-
-...
-
-### Any Other Sections
-### That You Think
-### Might be Useful
+* Restore from Google Drive
+* Delete files
+* Support a directory (nested files)
+* Support multiple profiles
+  * It enables you to use multiple Google accounts simultaneously
+    * e.g. Use your private account and office account
 
 ## License
+Copyright © 2020 xorphitus
 
-Copyright © 2020 FIXME
-
-This program and the accompanying materials are made available under the
-terms of the Eclipse Public License 2.0 which is available at
-http://www.eclipse.org/legal/epl-2.0.
-
-This Source Code may also be made available under the following Secondary
-Licenses when the conditions for such availability set forth in the Eclipse
-Public License, v. 2.0 are satisfied: GNU General Public License as published by
-the Free Software Foundation, either version 2 of the License, or (at your
-option) any later version, with the GNU Classpath Exception which is available
-at https://www.gnu.org/software/classpath/license.html.
+See the LICENSE file.
