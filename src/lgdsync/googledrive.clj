@@ -67,7 +67,12 @@
   [q]
   (join
    " and "
-   (map #(str (key %) \= (to-query-literal (val %))) q)))
+   (map #(let [k (key %)
+               v (val %)]
+           (if (= k "parent")
+             (str (to-literal v) " in parents")
+             (str k \= (to-query-literal v)))
+           ) q)))
 
 (s/fdef search-files
   :args (s/cat :drive-service #(not (string? %))
@@ -154,7 +159,7 @@
   [drive-service name parent]
   (when-let [file (first (search-files drive-service ["id"] 1
                                        {"name" name
-                                        "parents" [parent]
+                                        "parent" parent
                                         "trashed" false}))]
     (.getId file)))
 
