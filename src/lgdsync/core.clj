@@ -57,14 +57,12 @@
   []
   (reset! syncing false))
 
-
 (comment
   (st/unstrument)
   (st/instrument)
   (updated-files (str (System/getenv "HOME") "/tmp") (- (now-unix) (* 1000 60 60)))
   (start-file-sync (str (System/getenv "HOME") "/tmp") "lgdsync-test")
-  (stop-file-sync)
-  )
+  (stop-file-sync))
 
 (defn -main
   "main"

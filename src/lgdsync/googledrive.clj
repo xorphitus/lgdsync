@@ -59,7 +59,6 @@
     (coll? v) (str \[ (join \, (map to-query-literal v)) \])
     :else (str v)))
 
-
 (s/fdef to-query
   :args (s/cat :q map?))
 
@@ -71,8 +70,7 @@
                v (val %)]
            (if (= k "parent")
              (str (to-literal v) " in parents")
-             (str k \= (to-query-literal v)))
-           ) q)))
+             (str k \= (to-query-literal v)))) q)))
 
 (s/fdef search-files
   :args (s/cat :drive-service #(not (string? %))
