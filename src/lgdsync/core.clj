@@ -49,9 +49,9 @@
   [from to]
   (do
     (reset! syncing true)
-    (let [service (gd/get-drive-service)]
-      (gd/get-sync-dir service to)
-      (run-file-sync service from to))))
+    (let [service (gd/get-drive-service)
+          to-on-cloud (gd/get-sync-dir service to)]
+      (run-file-sync service from to-on-cloud))))
 
 (defn- stop-file-sync
   []
