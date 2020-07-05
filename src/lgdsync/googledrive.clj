@@ -135,11 +135,14 @@
                :parent string?))
 
 (defn- get-update-metadata
-  [f parent]
-  (let [file-metadata (File.)]
-    (.setName file-metadata (.getName f))
-    (.setParents file-metadata (list parent))
-    file-metadata))
+  ([f]
+   (get-update-metadata f nil))
+  ([f parent]
+   (let [file-metadata (File.)]
+     (.setName file-metadata (.getName f))
+     (when parent
+       (.setParents file-metadata (list parent)))
+     file-metadata)))
 
 (defn- create-file
   [drive-service f parent]
@@ -149,10 +152,10 @@
       (.execute)))
 
 (defn- update-file
-  [drive-service id f parent]
+  [drive-service id f]
   (-> drive-service
       (.files)
-      (.update id (get-update-metadata f parent) (FileContent. nil f))
+      (.update id (get-update-metadata f) (FileContent. nil f))
       (.execute)))
 
 (defn- get-same-file
@@ -166,7 +169,7 @@
 (defn- upsert-file
   [drive-service f parent]
   (if-let [id (get-same-file drive-service (.getName f) parent)]
-    (update-file drive-service id f parent)
+    (update-file drive-service id f)
     (create-file drive-service f parent)))
 
 (defn put-files
