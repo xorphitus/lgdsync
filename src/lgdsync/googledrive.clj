@@ -20,7 +20,7 @@
             [clojure.string :refer [join]]
             [lgdsync.config :refer [config-root]]))
 
-(def ^:private application-name "Google Drive API Java Quickstart")
+(def ^:private application-name "lgdsync")
 (def ^:private json-factory (.. JacksonFactory getDefaultInstance))
 (def ^:private scopes [DriveScopes/DRIVE_FILE])
 (def ^:private tokens-directory-path (str config-root "tokens"))
