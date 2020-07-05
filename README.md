@@ -22,6 +22,8 @@ Then, type the following command to start sync your files to Google Drive.
 * Support multiple profiles
   * It enables you to use multiple Google accounts simultaneously
     * e.g. Use your private account and office account
+* Use inotify to watch file changes
+  * Current watch mechanism is not perfect. It may miss file changes
 
 ## License
 Copyright © 2020 xorphitus
