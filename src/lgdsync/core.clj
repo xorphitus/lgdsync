@@ -1,6 +1,6 @@
 (ns lgdsync.core
   (:gen-class)
-  (:require [clojure.core.async :refer [go-loop <! timeout thread]]
+  (:require [clojure.core.async :refer [go-loop <! <!! timeout thread]]
             [clojure.java.io :as io]
             [clojure.spec.alpha :as s]
             [clojure.spec.test.alpha :as st]
@@ -33,6 +33,7 @@
 
 (defn- run-file-sync
   [service path sync-root]
+  ;; Currently it's no use using go-loop.
   (go-loop [now (now-unix)]
     (when @syncing
       (let [fs (updated-files path (- now interval))]
@@ -68,5 +69,7 @@
   "main"
   [& args]
   (do
+    (println "start lgdsync")
     (create-config-root)
-    (start-file-sync (first args) (second args))))
+    (<!!
+     (start-file-sync (first args) (second args)))))
