@@ -22,15 +22,15 @@ And you have to acquire a credentials JSON file from Google APIs console and pla
 
 ## Build
 
-    $ lein uberjar
+    $ ./build.sh
 
-Then, you can get `./target/uberjar/lgdsync-*-standalone.jar`.
+Then, you can get `./target/uberjar/lgdsync` as an executable file.
 
 ## Usage
 
 Then, type the following command to start sync your files to Google Drive.
 
-    $ java -jar /path/to/lgdsync-${version}-standalone.jar ${from} ${to}
+    $ /path/to/lgdsync ${from} ${to}
 
 * `${from}`
   * Specify the path which you want to sync
