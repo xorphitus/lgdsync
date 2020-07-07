@@ -9,6 +9,17 @@ Author's environment:
 * Java - 14.0.1 OpenJDK
 * Leiningen - 2.9.33
 
+And you have to acquire a credentials JSON file from Google APIs console and place it in the `~/.config/lgdsync/default` directory.
+
+1. Create a project from Google APIs console
+1. Select the project which you created
+1. Move to "APIs and Services"
+1. Move to "Library" and enable Google Drive API
+1. Move to "OAuth concent screen" and select Internal user type
+1. "Credentials" -> "Create Credentials" -> "OAuth client ID"
+1. Select application type "Desktop app"
+1. Download a client secret JSON file and rename it as `credentials.json`
+
 ## Build
 
     $ lein uberjar
@@ -16,7 +27,6 @@ Author's environment:
 Then, you can get `./target/uberjar/lgdsync-*-standalone.jar`.
 
 ## Usage
-First, download `credentials.json` from Google API console and place it in the `~/.config/lgdsync/default` directory.
 
 Then, type the following command to start sync your files to Google Drive.
 
