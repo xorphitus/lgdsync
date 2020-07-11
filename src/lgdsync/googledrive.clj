@@ -173,6 +173,6 @@
 (defn put-files
   [drive-service fs sync-root]
   (doseq [f fs]
-    (do
+    (when (.exists f)
       (println (str "put files: " (.getAbsolutePath f)))
       (upsert-file drive-service f sync-root))))
