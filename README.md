@@ -1,4 +1,6 @@
 # lgdsync
+![](https://github.com/xorphitus/lgdsync/workflows/CI/badge.svg)
+
 This is an unidirectional file sync application to Google Drive for multi-platform. It backups your files which are placed in a specified directory immediately when you change them.
 
 ## Requirement
