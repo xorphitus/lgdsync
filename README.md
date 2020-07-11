@@ -1,5 +1,5 @@
 # lgdsync
-This is an unidirectional file sync application to Google Drive. It backups your files which are placed in a specified directory immediately when you change them.
+This is an unidirectional file sync application to Google Drive for multi-platform. It backups your files which are placed in a specified directory immediately when you change them.
 
 ## Requirement
 Lgdsync requires Java to run, and [Leiningen](https://github.com/technomancy/leiningen) to build.
@@ -24,7 +24,8 @@ And you have to acquire a credentials JSON file from Google APIs console and pla
 
     $ ./build.sh
 
-Then, you can get `./target/uberjar/lgdsync` as an executable file.
+Then, you can get `./target/uberjar/lgdsync` as an executable file. It's available for Linux and macOS.
+If you are a Windows user, `.target/uberjar/lgdsync-${versio}-standalone.jar` is available.
 
 ## Usage
 
