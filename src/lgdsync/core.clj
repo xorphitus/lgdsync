@@ -37,8 +37,9 @@
   (go-loop [now (now-unix)]
     (when @syncing
       (let [fs (updated-files path (- now interval))]
-        (thread
-          (gd/put-files service fs sync-root)))
+        (doseq [f fs]
+          (thread
+            (gd/put-file service f sync-root))))
       (<! (timeout interval))
       (recur (now-unix)))))
 

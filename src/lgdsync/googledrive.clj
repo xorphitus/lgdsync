@@ -170,9 +170,8 @@
     (update-file drive-service id f)
     (create-file drive-service f parent)))
 
-(defn put-files
-  [drive-service fs sync-root]
-  (doseq [f fs]
-    (when (.exists f)
-      (println (str "put files: " (.getAbsolutePath f)))
-      (upsert-file drive-service f sync-root))))
+(defn put-file
+  [drive-service f sync-root]
+  (when (.exists f)
+    (println (str "put files: " (.getAbsolutePath f)))
+    (upsert-file drive-service f sync-root)))
