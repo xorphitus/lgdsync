@@ -28,5 +28,5 @@ jobs:
       run: lein kibit
     - name: Run eastwood
       run: lein eastwood
-    # - name: Run tests
-    #   run: lein test
+    - name: Run tests
+      run: lein test
