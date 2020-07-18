@@ -2,6 +2,7 @@
   (:gen-class)
   (:require [clojure.core.async :refer [go-loop <! <!! timeout thread]]
             [clojure.java.io :as io]
+            [clojure.string :as string]
             [clojure.spec.alpha :as s]
             [clojure.spec.test.alpha :as st]
             [lgdsync.config :refer [create-config-root]]
@@ -58,6 +59,27 @@
 (defn- stop-file-sync
   []
   (reset! syncing false))
+
+(s/fdef parse-cmd-line-args
+  :args (s/cat :args (s/coll-of string?)))
+
+(defn- cli-opt?
+  [a]
+  (string/starts-with? a "--"))
+
+(defn- parse-cmd-line-args
+  [args]
+  (let [grp (group-by cli-opt? args)
+        os (->> (get grp true)
+                (map #(subs % 2))
+                (map #(string/split % #"=" 2))
+                (map #(if (= (count %) 1)
+                        [(first %) true]
+                        %))
+                (flatten)
+                (apply hash-map))]
+    {:args (get grp false)
+     :opts os}))
 
 (comment
   (st/unstrument)
