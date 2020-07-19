@@ -18,24 +18,51 @@
   (:require [clojure.java.io :as io]
             [clojure.spec.alpha :as s]
             [clojure.string :refer [join]]
-            [lgdsync.config :refer [config-root]]))
+            [lgdsync.config :refer [get-config-root]]))
 
 (def ^:private application-name "lgdsync")
 (def ^:private json-factory (.. JacksonFactory getDefaultInstance))
 (def ^:private scopes [DriveScopes/DRIVE_FILE])
-(def ^:private tokens-directory-path (str config-root "tokens"))
-(def ^:private credentials-file-path (str config-root "credentials.json"))
 (def ^:private folder-mime-type "application/vnd.google-apps.folder")
 (def ^:private callback-url-port 8888)
 
-(defn- get-credentials
+(defn- get-config-path
+  [profile path]
+  (-> (get-config-root profile)
+      (io/file path)
+      (.getPath)))
+
+(defprotocol GoogleCredentialSource
+  (exists [this])
+  (get-credentials [this])
+  (get-token [this])
+  (to-location [this]))
+
+(defrecord PlainCredentialSource [profile]
+  GoogleCredentialSource
+  (exists [this]
+    (-> this
+        to-location
+        io/file
+        .exists))
+  (get-credentials [this]
+    (io/reader
+     (to-location this)))
+  (get-token [this]
+    (-> (get-config-path profile "tokens")
+        (io/file)
+        (FileDataStoreFactory.)))
+  (to-location [this]
+    (get-config-path profile "credentials.json")))
+
+(defn- get-auth-info-exec
   "Creates an authorized Credential object"
-  [http-transport]
-  (with-open [r (io/reader credentials-file-path)]
+  [cred-src http-transport]
+  (with-open [r (get-credentials cred-src)]
     (let [secrets (GoogleClientSecrets/load json-factory r)
           flow (->
                 (GoogleAuthorizationCodeFlow$Builder. http-transport json-factory secrets scopes)
-                (.setDataStoreFactory (FileDataStoreFactory. (io/file tokens-directory-path)))
+                (.setDataStoreFactory (get-token cred-src))
                 (.setAccessType "offline")
                 (.build))
           receiver (->
@@ -44,19 +71,31 @@
                     (.build))]
       (.authorize (AuthorizationCodeInstalledApp. flow receiver) "user"))))
 
+(defn- get-auth-info
+  [profile http-transport]
+  (let [cred-src (PlainCredentialSource. profile)]
+    (if (exists cred-src)
+      (get-auth-info-exec
+       cred-src
+       http-transport)
+      (throw (Exception. (format "Credential %s is not found" (to-location cred-src)))))))
+
+(s/fdef get-drive-service
+  :args (s/cat :profile string?))
+
 (defn get-drive-service
-  []
+  [profile]
   (let [http-transport (GoogleNetHttpTransport/newTrustedTransport)]
     (->
-     (Drive$Builder. http-transport json-factory (get-credentials http-transport))
+     (Drive$Builder. http-transport json-factory (get-auth-info profile http-transport))
      (.setApplicationName application-name)
      (.build))))
 
 (defn- to-query-literal
   [v]
   (cond
-    (string? v) (str "'" v "'")
-    (coll? v) (str \[ (join \, (map to-query-literal v)) \])
+    (string? v) (format "'%s'" v)
+    (coll? v) (format "[%s]" (join \, (map to-query-literal v)))
     :else (str v)))
 
 (s/fdef to-query
@@ -84,7 +123,7 @@
       (.files)
       (.list)
       (.setPageSize (int siz))
-      (.setFields (str "files(" (join \, fields) ")"))
+      (.setFields (format "files(%s)" (join \, fields)))
       (.setQ (to-query q))
       (.execute)
       (.getFiles)))
@@ -126,7 +165,7 @@
   [drive-service name]
   (if-let [id (find-sync-dir drive-service name)]
     id
-    (create-sync-dir (get-drive-service) name)))
+    (create-sync-dir drive-service name)))
 
 (s/fdef get-update-metadata
   :args (s/cat :f #(not (string? %))
@@ -175,3 +214,4 @@
   (when (.exists f)
     (println (str "put files: " (.getAbsolutePath f)))
     (upsert-file drive-service f sync-root)))
+

@@ -11,7 +11,7 @@ Author's environment:
 * Java - 14.0.1 OpenJDK
 * Leiningen - 2.9.33
 
-And you have to acquire a credentials JSON file from Google APIs console and place it in the `~/.config/lgdsync/default` directory.
+And you have to acquire a credentials JSON file from Google APIs console and place it in the `~/.config/lgdsync/${profile_name}` directory.
 
 1. Create a project from Google APIs console
 1. Select the project which you created
@@ -41,16 +41,22 @@ Then, type the following command to start sync your files to Google Drive.
   * Specify the folder name in Google Drive which you want to use to the backup
   * You don't have to create this folder before start lgdsync. Lgdsync creates the folder automatically
 
+
+### Profile
+
+You can pass a profile name with `-p` or `--profile` option. It enables you to use more than one Google account. If you don't pass the option, the profile name will automatically be `default`.
+
 ## Todo
 
-* Restore from Google Drive
-* Delete files
-* Support a directory (nested files)
-* Support multiple profiles
+* [ ] Restore from Google Drive
+* [ ] Delete files
+* [ ] Support a directory (nested files)
+* [x] Support multiple profiles
   * It enables you to use multiple Google accounts simultaneously
     * e.g. Use your private account and office account
-* Use inotify to watch file changes
+* [ ] Use inotify to watch file changes
   * Current watch mechanism is not perfect. It may miss file changes
+* [ ]  Native compile by GraalVM
 
 ## License
 Copyright © 2020 xorphitus
