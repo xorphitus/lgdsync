@@ -9,7 +9,7 @@
    (com.google.api.client.http FileContent)
    (com.google.api.client.http.javanet NetHttpTransport)
    (com.google.api.client.json JsonFactory)
-   (com.google.api.client.json.jackson2 JacksonFactory)
+   (com.google.api.client.json.gson GsonFactory)
    (com.google.api.client.util.store FileDataStoreFactory)
    (com.google.api.services.drive Drive$Builder)
    (com.google.api.services.drive DriveScopes)
@@ -21,7 +21,7 @@
             [lgdsync.config :refer [get-config-root]]))
 
 (def ^:private application-name "lgdsync")
-(def ^:private json-factory (.. JacksonFactory getDefaultInstance))
+(def ^:private json-factory (.. GsonFactory getDefaultInstance))
 (def ^:private scopes [DriveScopes/DRIVE_FILE])
 (def ^:private folder-mime-type "application/vnd.google-apps.folder")
 (def ^:private callback-url-port 8888)
