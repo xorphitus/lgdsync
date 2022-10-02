@@ -9,9 +9,13 @@
    (com.google.api.client.http FileContent)
    (com.google.api.client.http.javanet NetHttpTransport)
    (com.google.api.client.json JsonFactory)
-   (com.google.api.client.json.jackson2 JacksonFactory)
+   (com.google.api.client.json.gson GsonFactory)
    (com.google.api.client.util.store FileDataStoreFactory)
+   (com.google.api.services.drive Drive)
    (com.google.api.services.drive Drive$Builder)
+   (com.google.api.services.drive Drive$Files)
+   (com.google.api.services.drive Drive$Files$Create)
+   (com.google.api.services.drive Drive$Files$List)
    (com.google.api.services.drive DriveScopes)
    (com.google.api.services.drive.model File)
    (com.google.api.services.drive.model FileList))
@@ -21,7 +25,7 @@
             [lgdsync.config :refer [get-config-root]]))
 
 (def ^:private application-name "lgdsync")
-(def ^:private json-factory (.. JacksonFactory getDefaultInstance))
+(def ^:private json-factory (.. GsonFactory getDefaultInstance))
 (def ^:private scopes [DriveScopes/DRIVE_FILE])
 (def ^:private folder-mime-type "application/vnd.google-apps.folder")
 (def ^:private callback-url-port 8888)
@@ -58,11 +62,11 @@
 (defn- get-auth-info-exec
   "Creates an authorized Credential object"
   [cred-src http-transport]
-  (with-open [r (get-credentials cred-src)]
+  (with-open [r ^java.io.Reader (get-credentials cred-src)]
     (let [secrets (GoogleClientSecrets/load json-factory r)
           flow (->
                 (GoogleAuthorizationCodeFlow$Builder. http-transport json-factory secrets scopes)
-                (.setDataStoreFactory (get-token cred-src))
+                (.setDataStoreFactory ^FileDataStoreFactory (get-token cred-src))
                 (.setAccessType "offline")
                 (.build))
           receiver (->
@@ -88,7 +92,7 @@
   (let [http-transport (GoogleNetHttpTransport/newTrustedTransport)]
     (->
      (Drive$Builder. http-transport json-factory (get-auth-info profile http-transport))
-     (.setApplicationName application-name)
+     (.setApplicationName ^java.lang.String application-name)
      (.build))))
 
 (defn- to-query-literal
@@ -112,24 +116,24 @@
              (str k \= (to-query-literal v)))) q)))
 
 (s/fdef search-files
-  :args (s/cat :drive-service #(not (string? %))
+  :args (s/cat :drive-service #(= (type %) Drive)
                :fields vector?
                :siz number?
                :q map?))
 
 (defn- search-files
-  [drive-service fields siz q]
-  (-> drive-service
-      (.files)
-      (.list)
-      (.setPageSize (int siz))
-      (.setFields (format "files(%s)" (join \, fields)))
-      (.setQ (to-query q))
-      (.execute)
-      (.getFiles)))
+  [drive-service ^Drive fields siz q]
+  (as-> drive-service $
+    (.files ^Drive $)
+    (.list ^Drive$Files $)
+    (.setPageSize ^Drive$Files$List $ (int siz))
+    (.setFields ^Drive$Files$List $ (format "files(%s)" (join \, fields)))
+    (.setQ ^Drive$Files$List $ (to-query q))
+    (.execute ^Drive$Files$List $)
+    (.getFiles ^FileList $)))
 
 (s/fdef find-sync-dir
-  :args (s/cat :drive-service #(not (string? %))
+  :args (s/cat :drive-service #(= (type %) Drive)
                :name string?))
 
 (defn- find-sync-dir
@@ -139,10 +143,10 @@
                                 {"name" name
                                  "mimeType" folder-mime-type
                                  "trashed" false}))]
-    (.getId dir)))
+    (.getId ^File dir)))
 
 (s/fdef create-sync-dir
-  :args (s/cat :drive-service #(not (string? %))
+  :args (s/cat :drive-service #(= (type %) Drive)
                :name string?))
 
 (defn- create-sync-dir
@@ -150,15 +154,15 @@
   (let [metadata (File.)]
     (.setName metadata name)
     (.setMimeType metadata folder-mime-type)
-    (-> drive-service
-        (.files)
-        (.create metadata)
-        (.setFields "id")
-        (.execute)
-        (.getId))))
+    (as-> drive-service $
+      (.files ^Drive $)
+      (.create ^Drive$Files $ metadata)
+      (.setFields ^Drive$Files$Create $ "id")
+      (.execute ^Drive$Files$Create $)
+      (.getId ^File $))))
 
 (s/fdef get-sync-dir
-  :args (s/cat :drive-service #(not (string? %))
+  :args (s/cat :drive-service #(= (type %) Drive)
                :name string?))
 
 (defn get-sync-dir
@@ -168,7 +172,7 @@
     (create-sync-dir drive-service name)))
 
 (s/fdef get-update-metadata
-  :args (s/cat :f #(not (string? %))
+  :args (s/cat :f #(= (type %) java.io.File)
                :parent string?))
 
 (defn- get-update-metadata
@@ -176,24 +180,24 @@
    (get-update-metadata f nil))
   ([f parent]
    (let [file-metadata (File.)]
-     (.setName file-metadata (.getName f))
+     (.setName ^File file-metadata (.getName ^java.io.File f))
      (when parent
        (.setParents file-metadata (list parent)))
      file-metadata)))
 
 (defn- create-file
   [drive-service f parent]
-  (-> drive-service
-      (.files)
-      (.create (get-update-metadata f parent) (FileContent. nil f))
-      (.execute)))
+  (as-> drive-service $
+    (.files ^Drive $)
+    (.create ^Drive$Files $ (get-update-metadata f parent) (FileContent. nil f))
+    (.execute $)))
 
 (defn- update-file
   [drive-service id f]
-  (-> drive-service
-      (.files)
-      (.update id (get-update-metadata f) (FileContent. nil f))
-      (.execute)))
+  (as-> drive-service $
+    (.files ^Drive $)
+    (.update ^Drive$Files $ id (get-update-metadata f) (FileContent. nil f))
+    (.execute $)))
 
 (defn- get-same-file
   [drive-service name parent]
@@ -201,17 +205,17 @@
                                        {"name" name
                                         "parent" parent
                                         "trashed" false}))]
-    (.getId file)))
+    (.getId ^File file)))
 
 (defn- upsert-file
   [drive-service f parent]
-  (if-let [id (get-same-file drive-service (.getName f) parent)]
+  (if-let [id (get-same-file drive-service (.getName ^java.io.File f) parent)]
     (update-file drive-service id f)
     (create-file drive-service f parent)))
 
 (defn put-file
   [drive-service f sync-root]
-  (when (.exists f)
-    (println (str "put files: " (.getAbsolutePath f)))
+  (when (.exists ^java.io.File f)
+    (println (str "put files: " (.getAbsolutePath ^java.io.File f)))
     (upsert-file drive-service f sync-root)))
 

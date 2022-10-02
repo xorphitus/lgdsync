@@ -26,8 +26,8 @@
   (->> (io/file path)
        (file-seq)
        (filter #(and
-                 (> (.lastModified %) since)
-                 (.isFile %)))))
+                 (> (.lastModified ^java.io.File %) since)
+                 (.isFile ^java.io.File %)))))
 
 (s/fdef run-file-sync
   :args (s/cat :service #(not (string? %))
@@ -109,7 +109,8 @@
   (st/instrument)
   (updated-files (str (System/getenv "HOME") "/tmp") (- (now-unix) (* 1000 60 60)))
   (start-file-sync "default" (str (System/getenv "HOME") "/tmp") "lgdsync-test")
-  (stop-file-sync))
+  (stop-file-sync)
+  (comment))
 
 (defn -main
   "main"

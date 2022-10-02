@@ -8,8 +8,8 @@ Lgdsync requires Java to run, and [Leiningen](https://github.com/technomancy/lei
 
 Author's environment:
 
-* Java - 14.0.1 OpenJDK
-* Leiningen - 2.9.33
+* Java - 18.0.2 OpenJDK
+* Leiningen - 2.9.10
 
 And you have to acquire a credentials JSON file from Google APIs console and place it in the `~/.config/lgdsync/${profile_name}` directory.
 
