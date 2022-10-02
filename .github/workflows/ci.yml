@@ -13,20 +13,22 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Install clojure tools
+      uses: DeLaGuardo/setup-clojure@9.5
+      with:
+        cli: 'latest'
     - name: Cache local Maven repository
       uses: actions/cache@v2
       with:
         path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/project.clj') }}
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/deps.edn') }}
         restore-keys: |
           ${{ runner.os }}-maven-
-    - name: Install dependencies
-      run: lein deps
     - name: Check format
-      run: lein cljfmt check
+      run: clojure -M:cljfmt
     - name: Run kibit
-      run: lein kibit
+      run: clojure -M:kibit
     - name: Run eastwood
-      run: lein eastwood
+      run: clojure -M:eastwood
     - name: Run tests
-      run: lein test
+      run: clojure -M:test
