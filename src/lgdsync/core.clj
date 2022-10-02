@@ -109,7 +109,8 @@
   (st/instrument)
   (updated-files (str (System/getenv "HOME") "/tmp") (- (now-unix) (* 1000 60 60)))
   (start-file-sync "default" (str (System/getenv "HOME") "/tmp") "lgdsync-test")
-  (stop-file-sync))
+  (stop-file-sync)
+  (comment))
 
 (defn -main
   "main"
