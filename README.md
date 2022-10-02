@@ -46,18 +46,6 @@ Then, type the following command to start sync your files to Google Drive.
 
 You can pass a profile name with `-p` or `--profile` option. It enables you to use more than one Google account. If you don't pass the option, the profile name will automatically be `default`.
 
-## Todo
-
-* [ ] Restore from Google Drive
-* [ ] Delete files
-* [ ] Support a directory (nested files)
-* [x] Support multiple profiles
-  * It enables you to use multiple Google accounts simultaneously
-    * e.g. Use your private account and office account
-* [ ] Use inotify to watch file changes
-  * Current watch mechanism is not perfect. It may miss file changes
-* [ ]  Native compile by GraalVM
-
 ## License
 Copyright © 2020 xorphitus
 
