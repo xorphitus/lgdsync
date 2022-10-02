@@ -26,8 +26,8 @@
   (->> (io/file path)
        (file-seq)
        (filter #(and
-                 (> (.lastModified %) since)
-                 (.isFile %)))))
+                 (> (.lastModified ^java.io.File %) since)
+                 (.isFile ^java.io.File %)))))
 
 (s/fdef run-file-sync
   :args (s/cat :service #(not (string? %))
