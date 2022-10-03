@@ -26,8 +26,8 @@ And you have to acquire a credentials JSON file from Google APIs console and pla
 
     $ ./build.sh
 
-Then, you can get `./target/uberjar/lgdsync` as an executable file. It's available for Linux and macOS.
-If you are a Windows user, `.target/uberjar/lgdsync-${versio}-standalone.jar` is available.
+Then, you can get `./target/lgdsync` as an executable file. It's available for Linux and macOS.
+If you are a Windows user, `.target/lgdsync-${version}-standalone.jar` is available.
 
 ## Usage
 
