@@ -1,13 +1,12 @@
-name: CI
+name: CD
 
 on:
   push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+    tags:
+      - v[0-9]+.[0-9]+.[0-9]+.*
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -22,11 +21,9 @@ jobs:
         key: ${{ runner.os }}-maven-${{ hashFiles('**/deps.edn') }}
         restore-keys: |
           ${{ runner.os }}-maven-
-    - name: Check format
-      run: clojure -M:cljfmt
-    - name: Run kibit
-      run: clojure -M:kibit
-    - name: Run eastwood
-      run: clojure -M:eastwood
-    - name: Run tests
-      run: clojure -M:test
+    - name: Build
+      run: echo ::set-output name=artifact::$(clojure -T:build uber "{:version \"${GITHUB_REF_NAME}\"}")
+    - name: Upload
+      uses: softprops/action-gh-release@v1
+      with:
+          files: ${{ steps.vars.outputs.artifact }}
