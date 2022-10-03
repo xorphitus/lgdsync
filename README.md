@@ -3,15 +3,20 @@
 
 This is an unidirectional file sync application to Google Drive for multi-platform. It backups your files which are placed in a specified directory immediately when you change them.
 
-## Requirement
-Lgdsync requires Java to run and Clojure CLI to build.
+## Installation
+### Requirement
+Lgdsync requires Java to run.
 
 Author's environment:
 
 * Java - 18.0.2 OpenJDK
-* Clojure CLI - 1.11.1
 
-And you have to acquire a credentials JSON file from Google APIs console and place it in the `~/.config/lgdsync/${profile_name}` directory.
+### Download
+See the GitHub release page and download an executable file.
+
+### Google API Setting
+
+You have to acquire a credentials JSON file from Google APIs console and place it in the `~/.config/lgdsync/${profile_name}` directory.
 
 1. Create a project from Google APIs console
 1. Select the project which you created
@@ -22,16 +27,9 @@ And you have to acquire a credentials JSON file from Google APIs console and pla
 1. Select application type "Desktop app"
 1. Download a client secret JSON file and rename it as `credentials.json`
 
-## Build
-
-    $ ./build.sh
-
-Then, you can get `./target/lgdsync` as an executable file. It's available for Linux and macOS.
-If you are a Windows user, `.target/lgdsync-${version}-standalone.jar` is available.
-
 ## Usage
 
-Then, type the following command to start sync your files to Google Drive.
+Type the following command to start sync your files to Google Drive.
 
     $ /path/to/lgdsync ${from} ${to}
 
@@ -45,6 +43,19 @@ Then, type the following command to start sync your files to Google Drive.
 ### Profile
 
 You can pass a profile name with `-p` or `--profile` option. It enables you to use more than one Google account. If you don't pass the option, the profile name will automatically be `default`.
+
+## Build by Yourself
+
+Lgdsync requires Clojure CLI to build.
+
+Author's environment:
+
+* Clojure CLI - 1.11.1
+
+    $ ./build.sh
+
+Then, you can get `./target/lgdsync` as an executable file. It's available for Linux and macOS.
+If you are a Windows user, `.target/lgdsync-${version}-standalone.jar` is available.
 
 ## License
 Copyright © 2020 xorphitus
