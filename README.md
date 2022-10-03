@@ -12,7 +12,7 @@ Author's environment:
 * Java - 18.0.2 OpenJDK
 
 ### Download
-See the GitHub release page and download an executable file.
+See the GitHub release page and download a jar file.
 
 ### Google API Setting
 
@@ -31,7 +31,7 @@ You have to acquire a credentials JSON file from Google APIs console and place i
 
 Type the following command to start sync your files to Google Drive.
 
-    $ /path/to/lgdsync ${from} ${to}
+    $ java -jar /path/to/lgdsync.jar ${from} ${to}
 
 * `${from}`
   * Specify the path which you want to sync
@@ -39,10 +39,13 @@ Type the following command to start sync your files to Google Drive.
   * Specify the folder name in Google Drive which you want to use to the backup
   * You don't have to create this folder before start lgdsync. Lgdsync creates the folder automatically
 
-
 ### Profile
 
 You can pass a profile name with `-p` or `--profile` option. It enables you to use more than one Google account. If you don't pass the option, the profile name will automatically be `default`.
+
+### How to Omit `java -jar`
+
+You can omit `java -jar` by embedding shebang. See the "Build by Yourself" section to get an executable or embed shebang manually by following what the build script does.
 
 ## Build by Yourself
 

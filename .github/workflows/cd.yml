@@ -27,8 +27,11 @@ jobs:
         set -x
         artifact=$(clojure -T:build uber "{:version \"${GITHUB_REF_NAME}\"}")
         echo ::set-output name=artifact::"$artifact"
-    - name: Check artifact existence
-      run: ls ${{ steps.build.outputs.artifact }}
+    - name: Check artifact
+      run: |
+        set -e
+        ls ${{ steps.build.outputs.artifact }}
+        java -jar ${{ steps.build.outputs.artifact }} --help | grep Usage
     - name: Upload
       uses: softprops/action-gh-release@v1
       with:

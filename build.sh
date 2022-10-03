@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 readonly executable_path="./target/lgdsync"
 
 opts='{}'
@@ -10,7 +12,7 @@ fi
 jar=$(clojure -T:build uber "$opts")
 echo "Created a jar file: $jar"
 
-echo "#!/usr/bin/java -jar" > "$executable_path"
+echo '#!'"$(which java)" '-jar' > "$executable_path"
 cat "$jar" >> "$executable_path"
 chmod +x "$executable_path"
 
