@@ -4,12 +4,12 @@
 This is an unidirectional file sync application to Google Drive for multi-platform. It backups your files which are placed in a specified directory immediately when you change them.
 
 ## Requirement
-Lgdsync requires Java to run, and [Leiningen](https://github.com/technomancy/leiningen) to build.
+Lgdsync requires Java to run and Clojure CLI to build.
 
 Author's environment:
 
 * Java - 18.0.2 OpenJDK
-* Leiningen - 2.9.10
+* Clojure CLI - 1.11.1
 
 And you have to acquire a credentials JSON file from Google APIs console and place it in the `~/.config/lgdsync/${profile_name}` directory.
 
