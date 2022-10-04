@@ -21,7 +21,7 @@ jobs:
         key: ${{ runner.os }}-maven-${{ hashFiles('**/deps.edn') }}
         restore-keys: |
           ${{ runner.os }}-maven-
-    - name: Build
+    - name: Build jar
       id: build
       run: |
         set -x
@@ -32,7 +32,15 @@ jobs:
         set -e
         ls ${{ steps.build.outputs.artifact }}
         java -jar ${{ steps.build.outputs.artifact }} --help | grep Usage
-    - name: Upload
+    - name: Upload jar
       uses: softprops/action-gh-release@v1
       with:
         files: ${{ steps.build.outputs.artifact }}
+    - name: Build PKGBUILD
+      run: |
+        sha256=$(sha256sum ${{ steps.build.outputs.artifact }} | awk '{print $1}')
+        script/dist/arch/build_verify.sh "${GITHUB_REF_NAME}" "${sha256}"
+    - name: Upload PKGBUILD
+      uses: softprops/action-gh-release@v1
+      with:
+        files: script/dist/arch/PKGBUILD
