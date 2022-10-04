@@ -1,6 +1,21 @@
 (ns lgdsync.config
-  (:require [clojure.java.io :as io]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.spec.alpha :as s]))
+
+(def ^:private property
+  (when-let [conf (io/resource "property.edn")]
+    (-> conf
+        (slurp)
+        (edn/read-string))))
+
+(s/fdef get-property
+  :args (s/cat :k keyword?))
+
+(defn get-property
+  "Get application properties."
+  [k]
+  (k property))
 
 (defn- get-config-root-file
   [profile]
