@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 if [ $# -ne 2 ]; then
   echo "Usage: $0 <version> <sha256 hash of the jar file>"
   exit 1
