@@ -27,12 +27,3 @@
 (defn get-config-root
   [profile]
   (.getPath ^java.io.File (get-config-root-file profile)))
-
-(s/fdef create-config-root
-  :args (s/cat :profile string?))
-
-(defn create-config-root
-  [profile]
-  (let [dir ^java.io.File (get-config-root-file profile)]
-    (when-not (.exists dir)
-      (.mkdir dir))))
