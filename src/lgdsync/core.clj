@@ -6,7 +6,7 @@
             [clojure.spec.alpha :as s]
             [clojure.spec.test.alpha :as st]
             [clojure.tools.cli :refer [parse-opts]]
-            [lgdsync.config :refer [create-config-root]]
+            [lgdsync.config :refer [create-config-root get-property]]
             [lgdsync.googledrive :as gd]))
 
 (def ^:private interval 2000)
@@ -75,7 +75,8 @@
   [["-p" "--profile NAME" "Profile name"
     :default default-profile
     :validate [not-empty "Must specify a profile name"]]
-   ["-h" "--help"]])
+   ["-h" "--help"]
+   ["-v" "--version"]])
 
 (defn- usage [options-summary]
   (string/join
@@ -95,6 +96,8 @@
     (cond
       (:help options)
       {:exit-message (usage summary) :ok? true}
+      (:version options)
+      {:exit-message (or (get-property :version) "devel") :ok? true}
       errors
       {:exit-message (error-msg errors)}
       (= 2 (count arguments))
