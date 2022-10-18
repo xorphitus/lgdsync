@@ -22,7 +22,7 @@
   (:require [clojure.java.io :as io]
             [clojure.spec.alpha :as s]
             [clojure.string :refer [join]]
-            [lgdsync.config :refer [get-config-root]]))
+            [lgdsync.config :refer [decrypt get-config-root]]))
 
 (def ^:private application-name "lgdsync")
 (def ^:private json-factory (.. GsonFactory getDefaultInstance))
@@ -59,6 +59,25 @@
   (to-location [this]
     (get-config-path profile "credentials.json")))
 
+(defrecord EncryptedCredentialSource [profile]
+  GoogleCredentialSource
+  (exists [this]
+    (-> this
+        to-location
+        io/file
+        .exists))
+  (get-credentials [this]
+    (-> this
+        (to-location)
+        (decrypt)
+        (java.io.StringReader.)))
+  (get-token [this]
+    (-> (get-config-path profile "tokens")
+        (io/file)
+        (FileDataStoreFactory.)))
+  (to-location [this]
+    (get-config-path profile "credentials.json.gpg")))
+
 (defn- get-auth-info-exec
   "Creates an authorized Credential object"
   [cred-src http-transport]
@@ -77,12 +96,19 @@
 
 (defn- get-auth-info
   [profile http-transport]
-  (let [cred-src (PlainCredentialSource. profile)]
-    (if (exists cred-src)
-      (get-auth-info-exec
-       cred-src
-       http-transport)
-      (throw (Exception. (format "Credential %s is not found" (to-location cred-src)))))))
+  (let [encr-src (EncryptedCredentialSource. profile)
+        cred-src (PlainCredentialSource. profile)]
+    (if (exists encr-src)
+      (do
+        (println "An encrypted credential file was found")
+        (get-auth-info-exec
+         encr-src
+         http-transport))
+      (if (exists cred-src)
+        (get-auth-info-exec
+         cred-src
+         http-transport)
+        (throw (Exception. (format "Couldn't find a credential file neither %s nor %s" (to-location encr-src) (to-location cred-src))))))))
 
 (s/fdef get-drive-service
   :args (s/cat :profile string?))
