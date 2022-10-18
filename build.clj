@@ -17,7 +17,7 @@
 (defn clean [_]
   (b/delete {:path "target"}))
 
-(defn uber [{:keys [:version] :as params}]
+(defn uber
   "You can build a uberjar file by a command like the following examples.
   If you pass the version argument, it will be applied to the build name.
   If you ommit the version argument, a commit hash will be used instead.
@@ -27,6 +27,7 @@
     $ clojure -T:build uber
 
   And a build archifact file name will appear in stdout."
+  [{:keys [:version] :as params}]
   (clean nil)
   (embed-properties params)
   (b/copy-dir {:src-dirs ["src" "resources"]
