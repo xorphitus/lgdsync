@@ -26,12 +26,12 @@ jobs:
       run: |
         set -x
         artifact=$(clojure -T:build uber :version "${GITHUB_REF_NAME}")
-        echo ::set-output name=artifact::"$artifact"
+        echo "artifact=${artifact}" >> "${GITHUB_ENV}"
     - name: Check artifact
       run: |
         set -e
-        ls ${{ steps.build.outputs.artifact }}
-        java -jar ${{ steps.build.outputs.artifact }} --help | grep Usage
+        ls ${{ env.artifact }}
+        java -jar ${{ env.artifact }} --help | grep Usage
     - name: Upload jar
       uses: softprops/action-gh-release@v1
       with:
