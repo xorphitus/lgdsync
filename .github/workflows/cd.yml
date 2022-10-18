@@ -35,10 +35,10 @@ jobs:
     - name: Upload jar
       uses: softprops/action-gh-release@v1
       with:
-        files: ${{ steps.build.outputs.artifact }}
+        files: ${{ env.artifact }}
     - name: Build PKGBUILD
       run: |
-        sha256=$(sha256sum ${{ steps.build.outputs.artifact }} | awk '{print $1}')
+        sha256=$(sha256sum ${{ env.artifact }} | awk '{print $1}')
         script/dist/arch/build_verify.sh "${GITHUB_REF_NAME}" "${sha256}"
     - name: Upload PKGBUILD
       uses: softprops/action-gh-release@v1
