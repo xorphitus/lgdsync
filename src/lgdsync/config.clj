@@ -1,6 +1,7 @@
 (ns lgdsync.config
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.java.shell :refer [sh]]
             [clojure.spec.alpha :as s]))
 
 (def ^:private property
@@ -28,11 +29,11 @@
   [profile]
   (.getPath ^java.io.File (get-config-root-file profile)))
 
-(s/fdef create-config-root
-  :args (s/cat :profile string?))
+(s/fdef decrypt
+  :args (s/cat :path string?))
 
-(defn create-config-root
-  [profile]
-  (let [dir ^java.io.File (get-config-root-file profile)]
-    (when-not (.exists dir)
-      (.mkdir dir))))
+(defn decrypt [path]
+  (let [{:keys [exit out err]} (sh "gpg" "--decrypt" path)]
+    (if (zero? exit)
+      out
+      (throw (Exception. ^String err)))))

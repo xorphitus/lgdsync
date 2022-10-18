@@ -6,7 +6,7 @@
             [clojure.spec.alpha :as s]
             [clojure.spec.test.alpha :as st]
             [clojure.tools.cli :refer [parse-opts]]
-            [lgdsync.config :refer [create-config-root get-property]]
+            [lgdsync.config :refer [get-property]]
             [lgdsync.googledrive :as gd]))
 
 (def ^:private interval 2000)
@@ -126,6 +126,5 @@
         (System/exit (if ok? 0 1)))
       (do
         (println (str "start lgdsync with profile " profile ", from " src " to " dest))
-        (create-config-root profile)
         (<!!
          (start-file-sync profile src dest))))))

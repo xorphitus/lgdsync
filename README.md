@@ -59,6 +59,16 @@ You have to acquire a credentials JSON file from Google APIs console and place i
 1. Select application type "Desktop app"
 1. Download a client secret JSON file and rename it as `credentials.json`
 
+If you don't want to persist plain `credentials.json` in your environment for security reasons, GPG encryption is available with the following manner.
+
+```
+$ cd ~/.config/lgdsync/${profile_name}
+$ gpg -e -r ${your_identity} credentials.json
+$ rm credentials.json
+```
+
+Lgdsync automatically identifies an encrypted files by their file names and tries decryption on memory. If you want to set passphrases, invoke the `gpg` command with the `-c` option.
+
 ## Usage
 
 Type the following command to start sync your files to Google Drive.
