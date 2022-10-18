@@ -235,9 +235,12 @@
 
 (defn- upsert-file
   [drive-service f parent]
-  (if-let [id (get-same-file drive-service (.getName ^java.io.File f) parent)]
-    (update-file drive-service id f)
-    (create-file drive-service f parent)))
+  (try
+    (if-let [id (get-same-file drive-service (.getName ^java.io.File f) parent)]
+      (update-file drive-service id f)
+      (create-file drive-service f parent))
+    (catch java.io.FileNotFoundException _
+      (println (format "%s doesn't exist any more" (.getAbsolutePath ^java.io.File f))))))
 
 (defn put-file
   [drive-service f sync-root]
